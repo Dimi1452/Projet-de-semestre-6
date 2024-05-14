@@ -1,0 +1,1 @@
+Dans ce Git, se trouve les fichiers utiles concerant l'implémentation d'un régulateur auto-ajustable PID selon la méthode de Åström, K.J. and Hägglund, T. Le code est implémenté sur une carte DELFINO à l'aide de l'environnment Code Composer Studio. Dans le second dossier se trouve les fichier Tex du rapport. Le pdf généré est aussi présent.
