@@ -1,0 +1,148 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{EIVD}{report}{}
+      \name{author}{1}{}{%
+        {{hash=c499cbcf1ff0572866280f3b402c2641}{%
+           family={Mudry},
+           familyi={M\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {EIVD}%
+      }
+      \strng{namehash}{c499cbcf1ff0572866280f3b402c2641}
+      \strng{fullhash}{c499cbcf1ff0572866280f3b402c2641}
+      \strng{bibnamehash}{c499cbcf1ff0572866280f3b402c2641}
+      \strng{authorbibnamehash}{c499cbcf1ff0572866280f3b402c2641}
+      \strng{authornamehash}{c499cbcf1ff0572866280f3b402c2641}
+      \strng{authorfullhash}{c499cbcf1ff0572866280f3b402c2641}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Ajustage des paramètre d'un régulateur PID}
+      \field{type}{Note d'application}
+      \field{year}{2002}
+    \endentry
+    \entry{ZN}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=05f0cd46a3dcb93503fd9fdcb5e0bf05}{%
+           family={J.G.\bibnamedelimi Ziegler},
+           familyi={J\bibinitperiod\bibinitdelim Z\bibinitperiod},
+           given={N.B.\bibnamedelimi Nichols},
+           giveni={N\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+      }
+      \strng{namehash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \strng{fullhash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \strng{bibnamehash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \strng{authorbibnamehash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \strng{authornamehash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \strng{authorfullhash}{05f0cd46a3dcb93503fd9fdcb5e0bf05}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Optimum settings for automatic controllers}
+      \field{year}{1942}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb http://davidr.no/iiav3017/papers/Ziegler_Nichols_%201942.pdf
+      \endverb
+      \verb{url}
+      \verb http://davidr.no/iiav3017/papers/Ziegler_Nichols_%201942.pdf
+      \endverb
+    \endentry
+    \entry{AH}{book}{}
+      \name{author}{2}{}{%
+        {{hash=4d842a025a559e5c2edf98f59c10d29d}{%
+           family={Åström},
+           familyi={Å\bibinitperiod},
+           given={K.J.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=289f7492e7cd0d1898e2b55f807825f2}{%
+           family={Hägglund},
+           familyi={H\bibinitperiod},
+           given={T.},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \strng{fullhash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \strng{bibnamehash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \strng{authorbibnamehash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \strng{authornamehash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \strng{authorfullhash}{4b79e1b4cc0ec312378f2157128bd3d7}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{ISBN:1556175167}
+      \field{title}{« PID Controllers : Theory, Design and Tuning », Instrument Society of America, 2nd edition}
+      \field{year}{1995}
+      \field{dateera}{ce}
+    \endentry
+    \entry{AHAut}{manual}{}
+      \name{author}{4}{}{%
+        {{hash=4d842a025a559e5c2edf98f59c10d29d}{%
+           family={Åström},
+           familyi={Å\bibinitperiod},
+           given={K.J.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=289f7492e7cd0d1898e2b55f807825f2}{%
+           family={Hägglund},
+           familyi={H\bibinitperiod},
+           given={T.},
+           giveni={T\bibinitperiod}}}%
+        {{hash=b0ba346ea5ff29addcf1c4c80658d9f7}{%
+           family={C.C.},
+           familyi={C\bibinitperiod},
+           given={Hang},
+           giveni={H\bibinitperiod}}}%
+        {{hash=b7418a7d737b3cabff2556225d78e4f0}{%
+           family={Ho},
+           familyi={H\bibinitperiod},
+           given={W.K.},
+           giveni={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{544edfa4b75202388dd363a5d591afdf}
+      \strng{fullhash}{7daf3624d2227334958c20f8c32fe206}
+      \strng{bibnamehash}{7daf3624d2227334958c20f8c32fe206}
+      \strng{authorbibnamehash}{7daf3624d2227334958c20f8c32fe206}
+      \strng{authornamehash}{544edfa4b75202388dd363a5d591afdf}
+      \strng{authorfullhash}{7daf3624d2227334958c20f8c32fe206}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Automatic Tuning and Adaptation for PID Controllers - A Survey, Control Engineering Practice}
+      \field{year}{1993}
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/abs/pii/096706619391394C
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/abs/pii/096706619391394C
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

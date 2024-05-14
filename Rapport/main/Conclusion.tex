@@ -1,0 +1,27 @@
+% !TeX root = ../Rapport.tex
+\section{Conclusion}
+En conclusion, ce projet de semestre relève quelques points importants. Tous les systèmes ne peuvent pas être auto-régulés de manière efficace. Malgré la performance de la méthode Åström et Hägglund, on remarque qu'elle n'est pas la solution miracle. Certains systèmes ne fonctionnent pas avec celle-ci. Il est important de noter que cette méthode donne un bon point de départ pour un réglage plus fin des paramètres. L'avantage d'un tel régulateur est d'entrainer des oscillations contrôlées sans risquer de déstabiliser la boucle de réglage. Cette technique d'auto-ajustage s'opère de manière complètement autonome. Il est possible de changer la dynamique du système et de recalculer les paramètres ensuite. Malgré que l'implémentation n'ait été testée que sur une maquette, le programme a été codé de manière "universelle" et pourrait donc commander d'autres systèmes. 
+Concernant les gains obtenus, une vingtaine d'essais ont été faits. Les paramètres ont toujours été très proches, mais avec parfois des gains absurdes. (kp négatif, ki 10 fois supérieur aux précédents ...) Ceci appuie le fait que ce n'est pas LA solution, mais une aide à la régulation.
+
+
+\subsection{Conclusion personnelle}
+Ce travail aura été très bénéfique pour moi. La partie automatique m'a fait plonger dans les différentes méthodes de régulations pour la plupart déjà connues. La partie de code, elle, m'a donné quelques sueurs froides. J'ai quelques difficultés à penser comme un microprocesseur ainsi que de coder en "C". Je suis conscient que beaucoup d'optimisations peuvent être réalisées, malgré cela le code est fonctionnel. Pour résumer, il faut réfléchir au rythme de la carte et prendre point par point chaque variable pour un appel de fonction. Ensuite comprendre comment celle-ci est modifiée, quelle condition sera alors vraie ou fausse... En soi, j'imagine le programme au ralenti. La partie méthodologie n'est pas à laisser de côté. La structure permet de ne pas s'égarer ou perdre du temps sur certains sujets. Enfin, j'ai suivi mon planning avec quelques jours d'avance pour certaines tâches et l'inverse pour d'autres. Finalement l'écriture du rapport s'est faite tout au long du projet. 
+
+Je trouve que la programmation avec le PG5 est très limitée. Uniquement des fonctionnalités de base sont présentes. L'aspect visuel du programme peut être un atout. Comme j'ai pu le remarquer avec certains professeurs, la fonction d'auto-ajustage aurait été très fastidieuse à coder dans l'environnement de Saia. 
+
+Enfin, concernant les méthodes de régulation, je pense que la méthode de Ziegler et Nichols ainsi que celle de Åström et Hägglund donnent en principe de bons résultats, mais surtout un bon point de départ! La méthode itérative permet d'avoir des régulateurs opérationnels très rapidement. La méthode de placement des pôles décrit la dynamique du système. Elle nécessite une bonne connaissance mathématique (\'Equation différentielle, transformée de Laplace, fonction de transfert, plan complexe...)
+
+
+Dans l'exploration de ce projet, je réalise avec humilité qu'il n'existe pas de solution idéale ni de méthode parfaite. Cet objectif incessant de maîtriser notre environnement, nous confronte à une multitude de voies, chacune offrant ses propres défis et leçons. Cette diversité souligne l'importance de rester ouvert à différentes perspectives et approches.
+
+Je tiens à remercier M. Justin Moncef Lalou qui m’a suivi durant ce projet. Il m’a aiguillé et donné de précieux conseils.
+
+
+\vspace{\fill}
+\begin{flushright}
+	\begin{tabular}{c}
+		Fribourg, le \today\\
+		\includegraphics[height=5em]{img/Signature.png} \\
+		\@Maillard Dimitri
+	\end{tabular}
+\end{flushright}

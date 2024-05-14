@@ -1,0 +1,187 @@
+% !TeX root = ../Rapport.tex
+\section{Ajustage des paramètres d'un régulateur PID :)}
+
+Les régulateurs PID sont largement répandus dans l'industrie, avec une présence dépassant les 90\%. Malgré des décennies d'expérience, les réglages des paramètres Kp, Ki et Kd ne sont souvent pas optimaux pour les processus à contrôler.
+
+L'histoire des régulateurs remonte loin, dès 1788, avec l'installation d'un contrôleur de vitesse sur une machine à vapeur de James Watt, considéré comme l'un des premiers régulateurs de l'histoire.
+
+Aujourd'hui, diverses méthodes sont utilisées pour régler les régulateurs PID, qu'elles soient basées sur des approches mathématiques telles que le placement des pôles, ou empiriques, comme la méthode de Ziegler et Nichols. Chacune de ces approches présente ses propres avantages et inconvénients. Dans cette section, nous examinerons plusieurs de ces méthodes afin de les comparer. Pour une compréhension approfondie du fonctionnement et des composants d'un régulateur PID, explorons en détail les caractéristiques et le fonctionnement de ce dispositif.
+
+\subsection{Descriprtion d'un régulateur PID}
+
+Le régulateur PID remplit trois fonctions:
+\begin{itemize}
+	\item Il fournit un signal de commande $Y_{cm}(t)$ en tenant compte de l'évolution du signal de sortie $Y(t)$ par rapport à la consigne $Y_c(t)$.
+	\item Il élimine l'écart permanent grâce au terme intégrateur.
+	\item Il anticipe les variations de la sortie grâce au terme dérivateur.
+\end{itemize}
+Le schéma fonctionnel d'un système ou processus à régler est illustré à la figure \ref{fig: Schéma fonctionnel d'un processus à réglé par un PID classique} . Ce schéma ne présente pas la perturbation qui serait un terme à additionner au système. La descritpion temporelle du régulateur se donne par:
+\begin{equation}
+	Y_{cm}(t)=Kp\cdot  \left( e(t)+Ki\int_{0}^{t}e(t)dt+Kd\frac{de(t)}{dt} \ \right)
+	\label{eq: PID temporel}
+\end{equation}
+avec l'erreur définit comme:
+\begin{equation}
+	e(t)=Y_c(t)-Y_m(t)
+	\label{eq: erreur}
+\end{equation}
+
+\vspace{0.4cm}
+
+Dans le domaine de Laplace, sa fonction de transfert s'écrit:
+\begin{equation}
+	H_r(s)=\frac{Y_{cm}(s)}{E(s)}=kp+Kd\cdot s + \frac{Ki}{s}
+	\label{eq: PID Laplace}
+\end{equation}
+\begin{figure}[h]
+	\centering
+	
+	% Define block styles
+	\tikzstyle{block} = [draw, rectangle, minimum height=3em, minimum width=6em]
+	\tikzstyle{sum} = [draw, circle, node distance=1cm]
+	\tikzstyle{input} = [coordinate]
+	\tikzstyle{output} = [coordinate]
+	\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+	
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Nodes
+		\node [input, name=input] {};
+		\node [sum, right=of input] (sum) {};
+		\node [block, right=of sum] (controller) {Régulateur PID};
+		\node [block, right=of controller, node distance=3cm] (system) {Système};
+		\node [output, right=of system] (output) {};
+		\node [block, below left=1cm and -5cm of controller] (measurements) {Organe de mesure};
+		
+		% Arrows
+		\draw [->] (input) -- node {$Y_c(t)$} (sum);
+		\draw [->] (sum) -- node {$e(t)$} (controller);
+		\draw [->] (controller) -- node {$Y_{cm}(t)$} (system);
+		\draw [->] (system) -- node [name=y] {$y(t)$} (output);
+		\draw [->] (y) |- (measurements);
+		\draw [->] (measurements) -| node[pos=0.99] {$-$} node [near end] {$y_m(t)$} (sum);
+	\end{tikzpicture}
+
+
+\caption{Schéma fonctionnel d'un processus à réglé par un PID classique}
+\label{fig: Schéma fonctionnel d'un processus à réglé par un PID classique}
+\end{figure}
+
+\vspace{2cm}
+\subsubsection{Méthode de réglage des régulateur PID}
+Afin de répondre au mieux aux exigences de chaque processus à régler, il existe un bon nombre de méthode, en voici quelques unes.\\
+\begin{itemize}
+	\item Méthode de placement des pôles
+	\item Méthode itérative à trois phase
+	\item Méthode de Ziegler et Nichols
+	\item Métahode de Astrom et Hagglund
+\end{itemize}
+
+\vspace{3cm}
+
+\begin{figure}[h]
+	\centering
+	% Define block styles
+	\tikzstyle{block} = [draw, rectangle, minimum height=3em, minimum width=6em]
+	\tikzstyle{sum} = [draw, circle, node distance=1cm]
+	\tikzstyle{input} = [coordinate]
+	\tikzstyle{output} = [coordinate]
+	\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+	% Définir le style pour le relais à hystérésis
+	% Définir le style pour le relais à hystérésis
+
+	
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Nodes
+		\node [input, name=input] {};
+		\node [sum, right=of input] (sum) {};
+		\node [draw, circle ,right=of sum,name=sep] {};
+		\node [block, above right=0.2cm and of sep] (controller1) {Relais à hystéresis};
+		\node [block, below right=0.2cm and 1.25cm of sep] (controller2) {Régulateur PID};
+		\node [block, right=5cm of sep,name=spdt] {};
+		\node [spdt,thick, rotate=180 , right=7cm of sep,name=spdt3] {};
+		\node [block, right=of spdt, node distance=3cm] (system) {Système};
+		\node [output, right=of system] (output) {};
+		\node [block, below left=1.5cm and -5cm of controller] (measurements) {Organe de mesure};
+		
+		% Arrows
+		\draw [->] (input) -- node {$Y_c(t)$} (sum);
+		\draw [-](sum) -- node {$e(t)$} (sep);
+		\draw [->] (sep) |- (controller1);
+		\draw [->] (sep) |- (controller2);
+		\draw [->] (controller1) -| (spdt);
+		\draw [->] (controller2) -| (spdt);
+		\draw [->] (spdt) -- node [name=a] {$Y_{cm}(t)$}(system) ;
+		\draw [->] (system) -- node [name=y] {$y(t)$} (output);
+		\draw [->] (y) |- (measurements);
+		\draw [->] (measurements) -| node[pos=0.99] {$-$} node [near end] {$y_m(t)$} (sum);
+
+	\end{tikzpicture}
+	\caption{Schéma de principe du régulateur PID pour l'auto-ajustage selon Åström et Hägglund}
+	\label{fig: Schéma de principe du régulateur PID pour l'auto-ajustage selon Åström et Hägglund}
+\end{figure}
+
+
+
+\begin{table}[h]
+	
+	% Define block styles
+	\tikzstyle{block} = [rectangle, draw, %fill=blue!20, 
+	text width=4cm, text centered, rounded corners, minimum height=3em]
+	\tikzstyle{line} = [draw, -latex']
+
+		\centering
+	\begin{tikzpicture}[node distance = 2cm, auto]
+		% Place nodes
+		\node [block] (init) {Initialisation: $Y'_{ri}[0],e'[0]$};
+		\node[below of=init] (vide){};
+		\node [block, dashed, minimum width=2cm, minimum height=0.5cm, right=2cm of vide] (Clock) {Horloge};
+		\node [right=1cm of Clock] (periode) {$T$};
+		\node [block, below of=vide] (Conversion) {Conversion AD};
+		\node [left=1cm of Conversion] (mesure) {$Y_m(t)$};
+		\node [block, below of=Conversion] (erreur) {$Y'_{c}[n]-Y'_{m}[n]$};
+		\node [left=1cm of erreur] (correction) {$Y'_c(t)$};
+		\node[draw,circle, fill=black,radius=0.2cm, below of=erreur] (vide2){};
+		\node [block,below of=vide2, left=3cm of vide2](integrateur) {$Y'_{ri}[n-1]+k_{i}\cdot T\cdot e' [n]$};
+		\node [block,below of=vide2](proportionnel) {$k_{p}\cdot e' [n]$};
+		\node [block,below of=vide2,right=3cm of vide2](derivateur) {$\frac{k_d}{T}\cdot (e'[n]-e'[n-1])$};
+		\node[block, minimum width=8cm, text width=6cm, below of=integrateur] (anti-windup) {Traitement anti-windup:\\$ Y'_{ri}[n] > Y'_{rimax} -> Y'_{ri}[n]=Y'_{rimax}$\\$Y'_{ri}[n] < Y'_{rimin} -> Y'_{ri}[n]=Y'_{rimin}$};
+		\node[below of=proportionnel](vide3){};
+		\node [draw,circle, minimum size=1, below of=vide3] (sum) {};
+		\node [block,minimum width=8cm, text width=6cm, below of=sum] (limitation) {Limitation de $Y'_r[n]$\\$Y'_{rl}[n]=Y'_r[n] $\\ $ Y'_{r}[n] > Y'_{rmax} -> Y'_{rl}[n]=Y'_{rmax}$\\$Y'_{r}[n] < Y'_{rmin} -> Y'_{rl}[n]=Y'_{rmin}$};
+		\node [block, below of=limitation] (DA) {Conversion DA};
+		\node [block, below of=DA] (mise à jour) {Mise à jour:\\$e'[n-1]=e'[n]$\\$Y'_{ri}[n-1]=Y'_{ri}[n]$};
+		
+		% Draw edges
+		\path [line] (init) -- node[pos=0.9, left] {n=0,1...}(Conversion);
+		\path [line] (periode) -- (Clock);
+		\path [line] (Clock) -- (vide);
+		\path [line] (mesure) -- (Conversion);
+		\path [line] (correction) -- (erreur);
+		\path [line] (Conversion) -- node[midway, left] {$Y'_m[n]$}(erreur);
+		\path [line] (erreur) -- node[midway, left] {$e'[n]$}(vide2)--(proportionnel);
+		\path [line] (vide2.west) -- ++(-5.1,0) --(integrateur);
+		\path [line] (vide2) -- (proportionnel);
+		\path [line] (vide2.east) -- ++(5.1,0)--(derivateur);
+		\path [line] (integrateur) -- node[midway, left] {$Y'_{ri}[n]$}(anti-windup);
+		\path [line] (anti-windup.south) -- ++(0,-1.2)node[midway, left] {$Y'_{ril}[n]$}--(sum);
+		\path [line] (proportionnel) -- node[pos=0.1, left] {$Y'_{rp}[n]$}(sum);
+		\path [line] (derivateur.south) -- ++(0,-3.5)node[pos=0.1, left] {$Y'_{rd}[n]$}--(sum);
+		\path [line] (sum) -- node[midway, left] {$Y'_{r}[n]$}(limitation);
+		\path [line] (limitation) -- (DA);
+		\path [line] (DA) -- node[midway, left] {$Y'_{rl}(t)$}(mise à jour);
+		
+		
+	%	\path [line] (decide) -- node {oui}(stop);
+	%	\path [line] (decide.west) -- ++(-1,0) node[midway,above] {non} |- (identify.west);
+	\end{tikzpicture}
+	
+	\caption{Organigramme du régulateur PID numérique}
+	\label{table: Organigramme du régulateur PID numérique}
+\end{table}
+
+
+\vspace{5cm}
+
+Faire un tableau résumant les manière de réglage avec avantage inconvéniant de chacun 
+
+\section{Auto-Ajustage des paramètres}

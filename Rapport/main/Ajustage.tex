@@ -1,0 +1,242 @@
+% !TeX root = ../Rapport.tex
+\section{Ajustage des paramètres d'un régulateur PID :)}
+
+Les régulateurs PIDs sont largement répandus dans l'industrie, avec une présence dépassant les 90\%. Malgré des décennies d'expérience, les réglages des paramètres Kp, Ki et Kd ne sont souvent pas optimaux pour les processus à contrôler. 
+
+L'histoire des régulateurs remonte loin, dès 1788, avec l'installation d'un contrôleur de vitesse sur une machine à vapeur de James Watt, considéré comme l'un des premiers régulateurs de l'histoire.
+
+Aujourd'hui, diverses méthodes sont utilisées pour régler les régulateurs PID, qu'elles soient basées sur des approches mathématiques telles que le placement des pôles, ou empiriques, comme la méthode de Ziegler et Nichols. Chacune de ces approches présente ses propres avantages et inconvénients. Dans cette section, nous examinerons plusieurs de ces méthodes afin de les comparer. Pour une compréhension approfondie du fonctionnement et des composants d'un régulateur PID, explorons en détail les caractéristiques et le fonctionnement de ce dispositif.\cite{EIVD}
+
+\subsection{Description d'un régulateur PID}
+
+Le régulateur PID remplit trois fonctions:
+\begin{itemize}
+	\item Il fournit un signal de commande $Y_{cm}(t)$ en tenant compte de l'évolution du signal de sortie $Y(t)$ par rapport à la consigne $Y_c(t)$.
+	\item Il élimine l'écart permanent grâce au terme intégrateur.
+	\item Il anticipe les variations de la sortie grâce au terme dérivateur.
+\end{itemize}
+Le schéma fonctionnel d'un système ou processus à régler est illustré à la figure \ref{fig: Schéma fonctionnel d'un processus à régler par un PID classique} . Ce schéma ne présente pas la perturbation qui serait un terme à additionner au système. La description temporelle du régulateur se donne par:
+\begin{equation}
+	Y_{cm}(t)=Kp\cdot  \left( e(t)+Ki\int_{0}^{t}e(t)dt+Kd\frac{de(t)}{dt} \ \right)
+	\label{eq: PID temporel}
+\end{equation}
+avec l'erreur définie comme:
+\begin{equation}
+	e(t)=Y_c(t)-Y_m(t)
+	\label{eq: erreur}
+\end{equation}
+
+\vspace{0.4cm}
+
+Dans le domaine de Laplace, sa fonction de transfert s'écrit:
+\begin{equation}
+	H_r(s)=\frac{Y_{cm}(s)}{E(s)}=kp+Kd\cdot s + \frac{Ki}{s}
+	\label{eq: PID Laplace}
+\end{equation}
+
+\begin{figure}[h]
+	\centering
+	
+	% Define block styles
+	\tikzstyle{block} = [draw, rectangle, minimum height=3em, minimum width=6em]
+	\tikzstyle{sum} = [draw, circle, node distance=1cm]
+	\tikzstyle{input} = [coordinate]
+	\tikzstyle{output} = [coordinate]
+	\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+	
+	\begin{tikzpicture}[auto, node distance=1.5cm,>=latex',scale=0.75]
+		% Nodes
+		\node [input, name=input] {};
+		\node [sum, right=of input] (sum) {};
+		\node [block, right=of sum] (controller) {Régulateur PID };
+		\node [block, right=of controller] (command) {Organe de commande};
+		\node [block, right=of command] (system) {Système };
+		\node [output, right=of system] (output) {};
+		\node [block, below left=1cm and -7cm of controller] (measurements) {Organe de mesure };
+		
+		% Arrows
+		\draw [->] (input) -- node {$Y_c(t)$} (sum);
+		\draw [->] (sum) -- node {$e(t)$} (controller);
+		\draw [->] (controller) -- node {$Y_{cm}(t)$} (command);
+		\draw [->] (command)-- node{}(system);
+		\draw [->] (system) -- node [name=y] {$y(t)$} (output);
+		\draw [->] (y) |- (measurements);
+		\draw [->] (measurements) -| node[pos=0.99] {$-$} node [near end] {$y_m(t)$} (sum);
+	\end{tikzpicture}
+
+
+\caption{Schéma fonctionnel d'un processus à régler par un PID classique}
+\label{fig: Schéma fonctionnel d'un processus à régler par un PID classique}
+\end{figure}
+
+
+Où:\\
+Régulateur PID = $H_r(s)$\\
+Organe de commande = $H_{cm}(s)$\\ 
+Système = $H_s(s)$\\
+Organe de mesure = $H_m(s)$\\
+\vspace{2cm}
+\subsection{Méthode de réglage des régulateurss PID}
+Afin de répondre au mieux aux exigences de chaque processus à régler, il existe un bon nombre de méthodes, en voici quelques-unes.\\
+\begin{itemize}
+	\item Méthode itérative à trois phases
+	\item Méthode de Ziegler et Nichols
+	\item Métahode de Åström et Hägglund
+\end{itemize}
+
+
+\subsubsection{Méthode itérative à trois phases}
+Cette méthode empirique est très utilisée du fait de sa simplicité d'exécution. Il s'agit d'effectuer des essais en trois phases observant les effets prévisibes des trois corrections Kp,Ki et Kd. Dans tous les essais, on utilise un saut indiciel comme consigne.\\
+\begin{itemize}
+	\item \textbf{Phase 1:} Commencer par mettre Ki et Kd à 0. puis introduire un gain Kp de faible valeur et l'augmenter pour accélérer le processus réglé tant que les oscillations et les dépassements sont acceptables. Cette valeur de Kp permet de charger correctement l'organe de commande.
+	\item \textbf{Phase 2:} On ajoute la correction Kd en débutant à 0 jusqu'à obtenir un bon amortissement de la réponse $Y_m(t)$. Le réajustement de Kp peut être nécessaire.
+	\item \textbf{Phase 3:} Enfin on ajoute la correction Ki en débutant à 0 afin que $Y_m(t)$ atteigne la consigne rapidement. Si les oscillations reprennent ou ne sont plus acceptables, augmenter Kd ou diminuer Kp.
+\end{itemize}
+
+Si le réglage est cohérent sans l'une ou l'autre correction (Ki ou Kd) alors, nous les laisserons à 0. 
+\subsubsection{Méthode de Ziegler et Nichols}
+La méthode de Ziegler et Nichols appelée ZN dans ce document, est une approche basée sur leurs expériences. Elle consiste premièrement à n'utiliser qu'un régulateur P, en amenant le gain Kp jusqu'à oscillation permanente du système. A ce stade, on obtient la limite de stabilité. On attribue la valeur de Kp à Kc qui correspond au gain critique. On mesure la période d'oscillation appelée $T_c$. Grâce aux travaux de John G. Ziegler et Nathaniel B. Nichols le tableau ci-dessous donne les gains des différents régulateurs.\cite{ZN} \\ 
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			Régulateur & Kp  & Ki  & Kd \\
+			\hline
+			P& $0.5 \cdot kc$ & -  &  - \\
+			\hline
+			PI& $0.45 \cdot Kc$ & $1.2 \cdot \frac{Kp}{Tc}$ &  - \\
+			\hline
+			PID& $0.6 \cdot Kc$ & $2 \cdot \frac{Kp}{Tc}$ & $0.125\cdot Kp\cdot Tc $ \\
+			\hline
+		\end{tabular}
+	\end{center}
+\caption{Gains méthode ZN }
+\label{tab: gain ZN}
+
+\end{table}
+Remarque sur la méthode de ZN. Les essais doivent être réalisés hors saturation ou limite afin que les réponses reflètent le comportement propre du processus. L'expérience montre que les gains Kp proposés sont élevés et conduisent à des dépassements. On peut aisément les diviser par deux pour obtenir une réponse bien amortie. On peut admettre que le réglage ZN est un réglage primaire et que l'ajustage itératif plus fin peut être nécessaire (fine-tunning).
+\subsubsection{Méthode de Åström et Hägglund}
+Enfin cette méthode qui nous intéresse pour la suite du projet ressemble à la méthode ZN. Pour la suite du projet, la méthode AH sera utilisée, mais adjointe d'un régulateur à hystérésis ou tout ou rien (TOR). Ceci pour faire de l'auto-ajustage (Auto-tunning). Le schéma fonctionnel montré sur la figure \ref{fig: Schéma de principe du régulateur PID pour l'auto-ajustage selon Åström et Hägglund}. L'idée est de chercher le gain critique Kc à l'aide du régulateur à relais qui entrainera une oscillation de la grandeur réglée $Y_m(t)$. La réponse nous donnera trois paramètres pour calculer les gains du régulateur. $A_r$= Amplitude crête du relais, $A_m$= Amplitude crête de la mesure et Tc la période d'oscillation. \`{A} savoir qu'un coefficient "b" est ajouté avant le gain Kp. Les autres paramètres sont calculés à l'aide des équations ci-dessous. \cite{AH}
+
+\begin{equation}
+	K_c=\frac{4\cdot A_r}{\pi \cdot A_m}
+	\label{eq:gain critique}
+\end{equation}
+\begin{equation}
+	K_0=\frac{A_m}{A_r}
+	\label{eq:gain statique}
+\end{equation}
+\begin{equation}
+	\kappa=\frac{1}{k_0 \cdot K_c}
+	\label{eq:gain relatif}
+\end{equation}
+Finalement, en connaissant ceci, les coefficients du régulateur peuvent être donnés par une seule fonction:
+\begin{equation}
+	f(\kappa)=a_0\cdot e^{(a_1\cdot \kappa+ a_2 \cdot \kappa^2)}
+	\label{eq:AH}
+\end{equation}
+
+Les paramètres $a_0$, $a_1$ et $a_2$ sont donnés par le tableau \ref{tab:Paramètres selon AH}\\
+Rappel: le coefficient Ms "mesure" la sensibilité du réglage par rapport à la perturbation. Lorsque Ms=1.4, le régulateur aura un meilleur amortissement. \cite{AHAut}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/RepTorTheorie}
+	\caption{Réponse théorique d'un régulateur TOR pour identification des paramètres}
+	\label{fig:Réponse théorique d'un régulateur TOR pour identification des paramètres}
+\end{figure}	
+
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|c||c|c|c|}
+			\hline
+			\multicolumn{2}{|c|}{} & \multicolumn{3}{|c|}{Ms=2}& \multicolumn{3}{|c|}{Ms=1.4} \\
+			\hline
+			&  & $a_0$ & $a_1$ & $a_2$& $a_0$ & $a_1$ & $a_2$ \\
+			\hline
+			Kp & $a_0\cdot e^{(a_1\cdot \kappa+ a_2 \cdot \kappa^2)}\cdot K_c$ & 0.72 & -1.6 & 1.2 &0.33&-0.31&-1.0 \\
+			\hline
+			Ki& $Kp/a_0\cdot e^{(a_1\cdot \kappa+ a_2 \cdot \kappa^2)}\cdot T_c$ & 0.59 & -1.3 & 0.38 &0.76&-1.6 &-0.36 \\
+			\hline
+			Kd& $ T_c\cdot a_0\cdot e^{(a_1\cdot \kappa+ a_2 \cdot \kappa^2)}\cdot K_c$ & 0.15 & -1.4 &  0.56 &0.17&-0.46&-2.1 \\
+			\hline
+			b& $a_0\cdot e^{(a_1\cdot \kappa+ a_2 \cdot \kappa^2)}$ & 0.25 & 0.56 &  -0.12  &0.58&-1.3&3.5\\
+			\hline
+		\end{tabular}
+	\end{center}
+\caption{Paramètres selon AH}
+\label{tab:Paramètres selon AH}
+\end{table}
+
+
+
+\begin{figure}[h]
+	\centering
+	% Define block styles
+	\tikzstyle{block} = [draw, rectangle, minimum height=3em, minimum width=6em]
+	\tikzstyle{sum} = [draw, circle, node distance=1cm]
+	\tikzstyle{input} = [coordinate]
+	\tikzstyle{output} = [coordinate]
+	\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+	% Définir le style pour le relais à hystérésis
+	% Définir le style pour le relais à hystérésis
+
+	
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Nodes
+		\node [input, name=input] {};
+		\node [sum, right=of input] (sum) {};
+		\node [draw, circle ,right=of sum,name=sep] {};
+		\node [block, above right=0.2cm and of sep] (controller1) {Relais à hystéresis};
+		\node [block, below right=0.2cm and 1.25cm of sep] (controller2) {Régulateur PID};
+		\node [block, right=5cm of sep,name=spdt] {};
+		\node [spdt,thick, rotate=180 , right=7cm of sep,name=spdt3] {};
+		\node [block, right=of spdt, node distance=3cm] (system) {Système};
+		\node [output, right=of system] (output) {};
+		\node [block, below left=1.5cm and -5cm of controller] (measurements) {Organe de mesure};
+		
+		% Arrows
+		\draw [->] (input) -- node {$Y_c(t)$} (sum);
+		\draw [-](sum) -- node {$e(t)$} (sep);
+		\draw [->] (sep) |- (controller1);
+		\draw [->] (sep) |- (controller2);
+		\draw [->] (controller1) -| (spdt);
+		\draw [->] (controller2) -| (spdt);
+		\draw [->] (spdt) -- node [name=a] {$Y_{cm}(t)$}(system) ;
+		\draw [->] (system) -- node [name=y] {$y(t)$} (output);
+		\draw [->] (y) |- (measurements);
+		\draw [->] (measurements) -| node[pos=0.99] {$-$} node [near end] {$y_m(t)$} (sum);
+
+	\end{tikzpicture}
+	\caption{Schéma de principe du régulateur PID pour l'auto-ajustage selon Åström et Hägglund}
+	\label{fig: Schéma de principe du régulateur PID pour l'auto-ajustage selon Åström et Hägglund}
+\end{figure}
+
+
+
+
+\newpage
+
+\subsubsection{Résumé}
+Pour résumer, il existe une multitude de méthodes comportant des avantages et des inconvénients. La table \ref{tab: Résumé des régulateurs} reprend l'essentiel établi dans ce rapport.\\
+
+Il existe notamment une méthode appelée "placement des pôles" très convoitée dans les écoles. Le désavantage avec celle-ci, est qu'il faut connaître ou déterminer les fonctions de transfert du processus à régler. Cette méthode exige des connaissances mathématiques et/ou physique bien spécifiques. Le code en annexe \ref{code Matlab} permet de calculer, de placer et de ploter la réponse du système à régler. La manière itératives est très efficace pour obtenir des résultats rapide mais peut être sujette à quelques mauvaises interprétations. 
+
+\begin{table}[h]
+	\begin{center}
+		\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+			\hline
+			& Avantage & Inconvénient & Commentaire \\
+			\hline
+			Itération en trois phases & Facile à mettre en œuvre, adaptable, permet un contrôle fin & sensible aux erreurs humaines & Méthode empirique, Difficile d'optimiser \\
+			\hline
+			Ziegler \& Nichols & simplicité, rapidité, robustesse & sensible aux variations, manque de précision, limité & Excellent point de départ, utile si la modélisation du système est très complexe \\
+			\hline
+			Åström et Hägglund & Bonne performance, robustesse, auto-ajustage & Plus complexe à mettre en œuvre,sensible aux perturbations, limité & Idéal pour des modèles linéaire, méthode rapide et robuste \\
+			\hline
+		\end{tabularx}
+	\end{center}
+	\caption{Résumé des régulateurs}
+	\label{tab: Résumé des régulateurs}
+\end{table}
+

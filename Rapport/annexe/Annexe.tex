@@ -1,0 +1,243 @@
+% !TeX root = ../Rapport.tex
+\section{Logiciels utilisés}
+\begin{longtable}{p{4cm}p{1.5cm}p{3.5cm}p{5cm}}
+	\toprule
+	Nom & Version & Éditeur & Utilisation\\
+	\midrule\endhead 
+	% Add abbreviations alphabetically here:
+	TeXstudio & 4.7.3 & TeXstudio & Éditeur de documents \LaTeX\\
+	PG5 & V2.3.195 & Saia & Editeur de circuit Logique\\
+	Matlab & R2021b& Mathworks & Traitement des données\\
+	CodeComposerStudio & V11.1.0& TexasInstrument & Environnement de dév.\\
+	GitHub & V3.3.13 & GitHub & système de contrôle de version\\
+	\bottomrule
+\end{longtable}
+
+\section{Matériels utilisés}
+
+
+\begin{figure}[h]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		& n°   \\
+		\hline
+		Maquette& 5  \\
+		\hline
+		Alimentation& LEA-A-2   \\
+		\hline
+		Automate& LEA-PCD2.M5 10  \\
+		\hline
+	\end{tabular}
+	\caption{Matériel expérimentation n°1}
+\end{figure}
+
+
+
+\begin{figure}[h]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		& n°   \\
+		\hline
+		Banc moteur& 11-12  \\
+		\hline
+		Alimentation& LEA-A-55   \\
+		\hline
+		Sonde de courant& LEA.SC.07  \\
+		\hline
+		Oscilloscope& LEA.O.07  \\
+		\hline
+		Carte Delfino& 11  \\
+		\hline
+		Carte pont H& 20  \\
+		\hline
+	\end{tabular}
+	\caption{Matériel expérimentation n°2}
+\end{figure}
+\newpage
+\section{Annexe}
+Cette annexe regroupe les liens vers les ressources essentielles associées à ce projet. En particulier, nous fournissons ici le lien vers le dépôt GitHub, où le code source complet du projet est disponible. Ce dépôt constitue une ressource précieuse pour ceux qui souhaitent explorer davantage ce travail, contribuer à son développement ou simplement en apprendre plus sur sa mise en œuvre. Nous vous encourageons à visiter ce dépôt pour accéder au code source, aux instructions de déploiement et à d'autres documents pertinents pour une meilleure compréhension du projet.\\
+
+
+
+\begin{itemize}
+	\item GitHub :\url{https://github.com/Dimi1452/PS6}\\
+\end{itemize} 
+
+\subsection{Code pour le placement des pôles}
+\begin{lstlisting}[style=Matlab-bw,basicstyle=\ttfamily\scriptsize,caption={Code paramètre régulateur méthode de placement des pôles}, label={code Matlab}]
+	%%%%%% Methode de placment des pôles %%%%%%
+	clc;close all;clear all;clear workspace;
+	REG = "PID" ; %% Selection du régulateur (H'r(s))
+	s1 = -20;     %% Si PI,PD,PID choisi comme régulateur
+	s2 = -100;  %% Si PID choisi comme régulateur
+	
+	% Attention à avoir le numérateur et dénominateur de même taille !!	
+	% H'r
+	if REG=="P" % Hpr(s)=1
+		numHpr=[1];
+		denHpr=[1];
+	elseif REG=="PI" % Hpr(s)=(s-s1)/s
+		numHpr=[1, -s1];
+		denHpr=[1, 0];
+	elseif REG=="PD" % Hpr(s)=1-s/s1
+		numHpr=[-1/s1, 1];
+		denHpr=[0, 1];
+	elseif REG=="PID" % Hpr(s)=(s-s1)(s-s2)/(-s(s1+s2))
+		numHpr=[1, -s1-s2, s1*s2];
+		denHpr=(-s1-s2)*[0, 1, 0];
+	end
+	
+	% H'r customisé. Commenter si non utilisé
+	% REG="?"
+	%numHpr=[1, 8e5];
+	%denHpr=[1, 0];
+	
+	% Hcm
+	numHcm=[1.2];
+	denHcm=[1];
+	
+	% Hs
+	numHs=[0 0 1];
+	denHs=[1 1 0.26];
+	
+	% Hm
+	numHm=[0.2];
+	denHm=[1];
+	
+	%%%%%% Lieux des pôles %%%%%%
+	% calcul de HL
+	[numHL, denHL] = series(numHcm, denHcm, numHs, denHs);
+	[numHL, denHL] = series(numHL, denHL, numHm, denHm);
+	[numHL, denHL] = series(numHL, denHL, numHpr, denHpr)
+	% LP de HL
+	figure; sgrid('new');
+	rlocus(numHL, denHL);
+	title("LP régulateur " + REG)
+	
+	% Hit target
+	[kp, poles]=rlocfind(numHL, denHL);
+	
+	% Choix de Kp
+	% kp=2
+	
+	%%%%%% Réponse indicielle %%%%%%
+	% calcul de la fonction de transfert en bouclefermee
+	[numH0, denH0]=series(kp*numHcm, denHcm, numHs, denHs);
+	[numH0, denH0]=series(numH0, denH0, numHpr, denHpr);
+	
+	% calcul de Hbc
+	[numHbc, denHbc]=feedback(numH0, denH0, numHm, denHm);
+	
+	%%%%%% plot de la response indicielle %%%%%%
+	figure;
+	step(numHbc, denHbc);
+	title("réponse indicielle régulateur " + REG)
+\end{lstlisting}
+
+\subsection{Organigramme régulateur PID numérique}
+\begin{figure}[h]
+	
+	% Define block styles
+	\tikzstyle{block} = [rectangle, draw, %fill=blue!20, 
+	text width=4cm, text centered, rounded corners, minimum height=3em]
+	\tikzstyle{line} = [draw, -latex']
+	
+	\centering
+	\scalebox{0.7}{
+	\begin{tikzpicture}[node distance = 2cm, auto]
+		% Place nodes
+		\node [block] (init) {Initialisation: $Y'_{ri}[0],e'[0]$};
+		\node[below of=init] (vide){};
+		\node [block, dashed, minimum width=2cm, minimum height=0.5cm, right=2cm of vide] (Clock) {Horloge};
+		\node [right=1cm of Clock] (periode) {$T$};
+		\node [block, below of=vide] (Conversion) {Conversion AD};
+		\node [left=1cm of Conversion] (mesure) {$Y_m(t)$};
+		\node [block, below of=Conversion] (erreur) {$Y'_{c}[n]-Y'_{m}[n]$};
+		\node [left=1cm of erreur] (correction) {$Y'_c(t)$};
+		\node[draw,circle, fill=black,radius=0.2cm, below of=erreur] (vide2){};
+		\node [block,below of=vide2, left=3cm of vide2](integrateur) {$Y'_{ri}[n-1]+k_{i}\cdot T\cdot e' [n]$};
+		\node [block,below of=vide2](proportionnel) {$k_{p}\cdot e' [n]$};
+		\node [block,below of=vide2,right=3cm of vide2](derivateur) {$\frac{k_d}{T}\cdot (e'[n]-e'[n-1])$};
+		\node[block, minimum width=8cm, text width=6cm, below of=integrateur] (anti-windup) {Traitement anti-windup:\\$ Y'_{ri}[n] > Y'_{rimax} -> Y'_{ri}[n]=Y'_{rimax}$\\$Y'_{ri}[n] < Y'_{rimin} -> Y'_{ri}[n]=Y'_{rimin}$};
+		\node[below of=proportionnel](vide3){};
+		\node [draw,circle, minimum size=1, below of=vide3] (sum) {};
+		\node [block,minimum width=8cm, text width=6cm, below of=sum] (limitation) {Limitation de $Y'_r[n]$\\$Y'_{rl}[n]=Y'_r[n] $\\ $ Y'_{r}[n] > Y'_{rmax} -> Y'_{rl}[n]=Y'_{rmax}$\\$Y'_{r}[n] < Y'_{rmin} -> Y'_{rl}[n]=Y'_{rmin}$};
+		\node [block, below of=limitation] (DA) {Conversion DA};
+		\node [block, below of=DA] (mise à jour) {Mise à jour:\\$e'[n-1]=e'[n]$\\$Y'_{ri}[n-1]=Y'_{ri}[n]$};
+		
+		% Draw edges
+		\path [line] (init) -- node[pos=0.9, left] {n=0,1...}(Conversion);
+		\path [line] (periode) -- (Clock);
+		\path [line] (Clock) -- (vide);
+		\path [line] (mesure) -- (Conversion);
+		\path [line] (correction) -- (erreur);
+		\path [line] (Conversion) -- node[midway, left] {$Y'_m[n]$}(erreur);
+		\path [line] (erreur) -- node[midway, left] {$e'[n]$}(vide2)--(proportionnel);
+		\path [line] (vide2.west) -- ++(-5.1,0) --(integrateur);
+		\path [line] (vide2) -- (proportionnel);
+		\path [line] (vide2.east) -- ++(5.1,0)--(derivateur);
+		\path [line] (integrateur) -- node[midway, left] {$Y'_{ri}[n]$}(anti-windup);
+		\path [line] (anti-windup.south) -- ++(0,-1.2)node[midway, left] {$Y'_{ril}[n]$}--(sum);
+		\path [line] (proportionnel) -- node[pos=0.1, left] {$Y'_{rp}[n]$}(sum);
+		\path [line] (derivateur.south) -- ++(0,-3.5)node[pos=0.1, left] {$Y'_{rd}[n]$}--(sum);
+		\path [line] (sum) -- node[midway, left] {$Y'_{r}[n]$}(limitation);
+		\path [line] (limitation) -- (DA);
+		\path [line] (DA) -- node[midway, left] {$Y'_{rl}(t)$}(mise à jour);
+		
+		
+		%	\path [line] (decide) -- node {oui}(stop);
+		%	\path [line] (decide.west) -- ++(-1,0) node[midway,above] {non} |- (identify.west);
+	\end{tikzpicture}
+}
+	\caption{Organigramme du régulateur PID numérique}
+	\label{fig: Organigramme du régulateur PID numérique}
+\end{figure}
+
+\newpage
+
+\subsection{Code Matlab paramètres méthode AH}
+\begin{lstlisting}[style=Matlab-bw,basicstyle=\ttfamily\scriptsize,caption={Code Matlab: calcul des paramètres du régulateur selon la méthode AH}, label={code Matlab2}]
+%% Calcul des paramètres PID par l'autoajustage selon Astrm et Hagglund
+clc;close all;clear all;
+Ar= (4000-0)/2;% Aplitude relais max
+Am= (10000-0)/2;% Amplitude mesure max
+Tc=3.2; %Période d'oscillation
+Ms=1.4; %coefficient de sensibilité 1.4 ou 2
+
+K0=Am/Ar;% gain statique 
+Kc=4*Ar/(pi*Am); % 
+k=1/(K0*Kc);
+
+	if Ms==1.4
+		kpa0=0.33;kpa1=-0.31;kpa2=-1;
+		kia0=0.76;kia1=-1.6;kia2=-0.36;
+		kda0=0.17;kda1=-0.46;kda2=-2.1;
+		ba0=0.58;ba1=-1.3;ba2=3.5;
+		Kp= kpa0*exp(kpa1*k+kpa2*k^2)*Kc;
+		Ti= kia0/(exp(kia1*k+kia2*k^2)*Tc);
+		Td= kda0*exp(kda1*k+kda2*k^2)*Tc;
+		b=ba0*exp(ba1*k+ba2*k^2);
+	
+	else
+		kpa0=0.72;kpa1=-1.6;kpa2=1.2;
+		kia0=0.59;kia1=-1.3;kia2=-0.38;
+		kda0=0.15;kda1=-1.4;kda2=0.56;
+		ba0=0.25;ba1=0.56;ba2=-0.12;
+		Kp= kpa0*exp(kpa1*k+kpa2*k^2)*Kc;
+		Ti= kia0/(exp(kia1*k+kia2*k^2)*Tc);
+		Td= kda0*(exp(kda1*k+kda2*k^2)*Tc);
+		b=ba0*exp(ba1*k+ba2*k^2);
+	
+	end
+
+	Kp=Kp*b;
+	Ki=1/Ti;
+	Kd=1/Td;
+	display(Kp);
+	display(Ki);
+	display(Kd);
+	display(b);
+\end{lstlisting}
+

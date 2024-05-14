@@ -1,0 +1,101 @@
+% !TeX root = ../Rapport.tex
+\section{Expérimentation 1}
+Pour cette première partie, le système à régler est une balle de ping-pong à l'intérieur d'un tube (Colonne à lévitation). Un ventilateur fonctionnant comme un aspirateur commandé par une tension de 0 à  $\pm 10V_{dc}$ et alimenté par un amplificateur linéaire. L'air dans le tube est dépressurisé par aspiration en fonction de la vitesse de rotation du ventilateur (approximatif). Enfin un laser situé au sommet du tube permet la mesure de la hauteur de la balle. La tension de mesure est de 0 à 10$V_{dc}$. (figure \ref{fig:Schéma de l'expérimentation n°1}). Le régulateur qui règle la hauteur de la balle est implémenté sur l’API (SAIA-PCD2). L’acquisition de la mesure se fait sur l’A/D (input analogique) et la commande se fait via un D/A (sortie analogique). La source de tension est limitée à $\pm 1.5A$. L'objectif est que la balle de ping-pong atteigne la hauteur de 1m grâce à la méthode de Åström et Hägglund (auto-tunning).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{img/SchémaExp1}
+	\caption{Schéma de l'expérimentation n°1}
+	\label{fig:Schéma de l'expérimentation n°1}
+\end{figure}
+\subsection{Réalisation de la régulation}
+\textbf{Travaux préparatoires}\\
+Quelques manipulations doivent être exécutées avant même l'implémentation du programme. Premièrement, il faut donner une valeur de consigne préalable au ventilateur pour compenser le poids de la balle (commande à priori). Celle-ci doit être à peine amorcée. Deuxièmement, il faut connaitre les caractéristiques du laser. Ici de simples tests ont permis de formuler la caractéristique en fonction de la hauteur: $f(x)=50\cdot x + 80$ .\\
+
+\vspace{0.1cm}
+
+\textbf{Environnement de programmation}\\
+Comme cité en introduction, le code est réalisé en langage FUPLA (bloc fonctionnel) propriété de Saia. Le code contient un programme principal (figure \ref{fig:Programme Main}) qui appellera les différentes fonctions. Une fonction dénommée "relais" (figure \ref{fig:Fonction Relay}) comporte les instructions pour faire osciller la balle et ainsi trouver les 3 paramètres cruciaux pour la régulation. Une fonction "PID"  (figure \ref{fig:Fonction PID}) qui permet au système d'obtenir le résultat attendu.
+
+\begin{figure}[h!]
+	\begin{subfigure}{0.5\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{img/SAIA_MAIN}
+		\caption{Programme Main}
+		\label{fig:Programme Main}
+	\end{subfigure}
+	\begin{subfigure}{0.5\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{img/relay}
+		\caption{Fonction Relay}
+		\label{fig:Fonction Relay}
+	\end{subfigure}
+\caption{Fonction Main et Relay Saia}
+\end{figure}
+
+\textbf{Programme Main:}\\
+La fonction main comporte deux entrées numériques (switch on-off) qui commandent un bloc Blink chacun. La période de scintillement est de 200ms. Le bloc "Call PB 1" appelle la fonction Relay et "Call PB 2" appelle la fonction PID.\\
+
+\textbf{Fonction Relay:}\\
+L'entrée analogique lit la valeur du laser et la soustrait à la valeur de consigne du relais qui donne l'erreur. Cette erreur est comparée avec la caractéristique médiane du laser (au centre); si elle est plus petite, on la multiplie avec une constante (Yrmax). Si elle est plus grande, on la multiplie par l'opposé de cette constante (Yrmin=-Yrmax). En additionnant les deux sorties de multiplication (dont l'une des deux vaudra 0 en fonction de la condition) et la commande à priori, on obtient la sortie qui correspond à la commande à envoyer sur l'amplificateur et le ventilateur.\\
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/SAIA_PID}
+	\caption{Fonction PID}
+	\label{fig:Fonction PID}
+\end{figure}	
+
+\textbf{Fonction PID:}\\
+Pour la fonction PID, un organigramme est présenté en annexe figure \ref{fig: Organigramme du régulateur PID numérique}, page \pageref{fig: Organigramme du régulateur PID numérique}
+
+
+\subsection{Résultats}
+
+\`{A} ce stade, il est judicieux d'analyser l'oscillogramme de l'API. On remarque que le régulateur fait bien une commande TOR (tout ou rien). On peut alors extraire les données, pour l'instant manuellement.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/relay_1}
+	\caption{Oscillogramme régulateur à relais (En rouge le signal de la mesure, en vert, la commande du ventilateur.)}
+	\label{fig:Oscillogramme régulateur à relais}
+\end{figure}
+
+On observe une période d'oscillation de 3,2 secondes, une amplitude du signal de mesure de 3000 et une amplitude de la réponse de 750. Grâce à ceux-ci, on peut déterminer les paramètres Kp,Ki, kd et b selon Åström et Hägglund. Dans ce cas, ils valent: Kp=0.0804, Ki=0.9597, Kd= 0.1038 (Où Kp=kp*b). A ce stade il semble judicieux de tester ces paramètres dans le régulateur PID implémenter dans l'API avant de réaliser l'algorithme auto-tunning. La réponse obtenue est à la figure \ref{fig:Réponse du système avec les paramètres selon la méthode AH}. La régulation ne s'effectue pas correctement. La balle de ping-pong tape en butée sur le haut et le bas de la maquette. Afin de se faire une idée de la valeur des paramètres satisfaisants, il est utile d'utiliser une autre approche pour justifier des changements. Pour la suite, la méthode itérative est privilégiée. La figure \ref{fig:Réponse du système avec les paramètres selon la méthode itérative} illustre la réponse. Les valeurs des paramètres sont largement différentes de celles obtenues avec la méthode AH. La méthode ZN présente elle aussi une mauvaise réponse avec la balle qui s'envole vers le sommet du tube et à l'inverse vers le bas. Le tableau ci-dessous  résume les paramètres obtenus. (On remarque que pour la méthode itérative, le temps de réglage peut être amélioré). 
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/Reglage PID ZN}
+	\caption{Réponse du système avec les paramètres selon la méthode AH}
+	\label{fig:Réponse du système avec les paramètres selon la méthode AH}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/Reglage PID methode au cul}
+	\caption{Réponse du système avec les paramètres selon la méthode itérative}
+	\label{fig:Réponse du système avec les paramètres selon la méthode itérative}
+\end{figure}
+
+\begin{table}
+	\centering
+	
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	& AH & ZN & itérative \\
+	\hline
+	Kp&  0.0804 & 0.279 & 0.5 \\
+	\hline
+	Ki& 0.9597 & 0.2232 & 0.022 \\
+	\hline
+	Kd& 0.1038 & 0.0871 & 0.6 \\
+	\hline
+	
+\end{tabular}
+\caption{résumé des paramètres}
+\label{tab:résumé des paramètres}
+\end{table}
+
+En résumé, on obtient des gains très différents selon la méthode utilisée; table \ref{tab:résumé des paramètres}. Afin d'obtenir une réponse viable mais convenable pour la méthode AH, il est nécessaire d'ajuster les paramètres. Ce qui est contradictoire au thème de ce projet. C'est pourquoi il est primordial de se questionner. La maquette est-elle adaptée à cette méthode? La fréquence d'échantillonnage est elle suffisante? On peut prétendre répondre par la négative à ces deux questions. Le système est très voir trop oscillant. De plus, la fréquence maximale à laquelle l'automate travaille est de 100 ms. Cette expérimentation n'est pas adaptée à un tel régulateur. En partant de ce constat, et du fait que l'industrie travaille principalement avec des moteurs, une seconde maquette a été mise en place. Elle est décrite dans le point suivant.

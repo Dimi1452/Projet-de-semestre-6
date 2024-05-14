@@ -1,0 +1,348 @@
+% !TeX root = ../Rapport.tex
+\section{Expérimentation 2}
+Pour cette deuxième expérimentation, le but reste inchangé. Il s'agit de donner une consigne de position et grâce au régulateur implémenté sur la carte Deflino, atteindre celle-ci. Le microprocesseur étant nettement plus rapide que l'API précédemment utilisé, devrait donner des résultats plus concluants. La figure \ref{fig:Setup de test de la deuxième expérience}, décrit l'installation. Le processus à régler est le moteur DC. La carte Delfino intègre le régulateur ainsi que différentes interfaces (Bouton poussoir, display). Celle-ci commande le pont H en PWM.La sortie du pont H commande le moteur. La mesure se fait à l'aide d'un codeur incrémental et est acquise par un ADC sur le microprocesseur.\\
+Le langage de programmation pour cette carte est le "C". La base du programme à été récupérée afin de gagner du temps sur l'étude de la problématique. Le code en question se trouve dans le fichier "user.c" et "user.h" dont la fonction principale se nomme "UserTe". L'appel de cette fonction se fait grâce à un compteur qui l'exécute toute les $100\mu s$.\\
+Afin de pouvoir tester les phases les unes après les autres, le régulateur TOR a été fait en premier. Les calculs de paramètres ont été faits grâce au code Matlab \ref{code Matlab2}. Puis le régulateur PID en déclarant des constantes comme paramètres précédemment calculé. Ces étapes sont entrecoupées de différents tests et mesurent pour valider l'implémentation et les calculs. Enfin, le régulateur autoajustable, est écrit dans son entier.
+
+\textbf{Note pour les utilisateurs}\\
+Le bouton 1 donne un saut de consigne. L'appui sur le bouton 2 lance la phase de calcul du régulateur autotuner.\\
+\textbf{Note pour les oscillogrammes:}\\
+le signal jaune correspond à la consigne, en bleu le signal mesuré et en vert le courant.\\
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.99\linewidth]{img/Setup}
+	\caption{Setup de test de la deuxième expérience}
+	\label{fig:Setup de test de la deuxième expérience}
+\end{figure}
+
+\newpage
+
+\subsection{Régulateur TOR}  
+Il s'agit de programmer un régulateur tout ou rien. C'est à dire, donner une consigne de position, une fois celle-ci atteinte inverser la consigne. La conséquence de cette commande est mesurée et devrait ressembler à une onde sinusoïdale. \`A noter que le signal peut être bruité. Le code \ref{Implémentation régulateur TOR} décrit la fonction void RegRelais(void).
+
+\begin{lstlisting}[language=C,caption={Implémentation Régulateur TOR}, label={Implémentation régulateur TOR}]
+void RegRelais(void)
+{
+//////////////////////Régulateur à Relais/////////////////////////////////
+	if(FirstRelais==true)               //initier le mouvement
+	{
+	FirstRelais=false;
+	mesure_t[0]=-0.4;
+	}
+
+	ecart_t[0] = mesure_t[0];
+
+	if(ecart_t[0]>0.3)
+	{
+	ucm=-consigneReg;
+	}
+	else if(ecart_t[0]<-0.3)
+	{
+	ucm=consigneReg;
+	
+	}
+
+}
+
+\end{lstlisting}
+
+\underline{Commentaires sur le code \ref{Implémentation régulateur TOR}}:\\
+Étant donné qu'aucune consigne n'est donnée, l'écart est de 0. Les lignes 4 à 8 imposent une mesure faussée pour initier le mouvement. Comme le booléen de la condition est sur false pour la suite de l'exécution, elle est faite une seule fois. La suite de la fonction inverse la commande du relais lorsque celle-ci est dépassée et inversement lorsqu'elle est négative. Afin que les oscillations soient visibles, on donne l'intervalle de -0.3 à 0.3. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/upRegRelaisTest1}
+	\caption{Réponse du système pour la commande TOR}
+	\label{fig:Réponse du système pour la commande TOR}
+\end{figure}
+
+Grâce à cet oscillogramme, il est possible de calculer les différents paramètres. Il suffit de repérer d'amplitude du signal de commande, l'amplitude du signal mesurer et la période d'oscillation. Avec les équations \ref{eq:gain critique}, \ref{eq:gain statique} et \ref{eq:gain relatif} et la table \ref{tab:Paramètres selon AH} les paramètres, Kp, Ki, Kd et b sont facilement calculés. Le script Matlab renvoie les gains suivant: Kp=0.4478, Ki=0.0342, Kd=0.0037 (b est déjà multiplié avec kp dans le script). Le régulateur à relais peut être interrompu, le switch s'oriente vers le régulateur PID.\\
+\`A savoir que la sortie du DAC de la carte Delfino a été amplifiée de 5x. Il est judicieux de prendre les amplitudes selon la mesure de la carte et non la valeur de l'oscilloscope.
+
+\newpage
+
+\subsection{Régulateur PID}
+Comme le décrit la figure \ref{fig: Schéma fonctionnel d'un processus à régler par un PID classique} ainsi que l'organigramme du régulateur PID numérique de la figure \ref{fig: Organigramme du régulateur PID numérique}, un écart est calculé par entre la consigne et la valeur mesurée. Grâce à cet écart et l'écart précédent, on peut intégrer et dériver (numériquement). La commande régulée est l'addition de Yrp,Yri et Yrd selon le code \ref{Implémentation régulateur PID}. 
+
+\begin{lstlisting}[language=C,caption={Implémentation Régulateur PID}, label={Implémentation régulateur PID}]
+float Kp=0.4478;
+float Ki=0.0342;
+float Kd=0.0037;	
+	
+ //////////////////////////////Régulateur PID//////////////////////////////////////
+ecart_t[0]=cons_t - mesure_t[0];          // calcul de l'erreur
+
+Yrp= ecart_t[0];                          // Régulateur proportionnel
+
+Yri[0]= Yri[1] + ecart_t[0]*Te;           // Régulateur intégrateur
+
+
+// Anti Wind-up
+if (Yri[0]>0.5)  {
+	Yri[0] = 0.5;
+}
+else if (Yri[0]<-0.5) {
+	Yri[0] = -0.5;
+}
+
+Yrd= (ecart_t[0]-ecart_t[1])/Te;          // Régulateur différenciateur
+
+ucm= (Kp * Yrp + Ki * Yri[0] + Kd * Yrd); // sortie du régulateur
+
+Yri[1]=Yri[0];                            // mise à jour des variables dans le temps
+ecart_t[1]=ecart_t[0];
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[language=C,caption={Mesure de la position et de l'écart}, label={Mesure de la position et de l'écart}]
+//=====================================================================
+//	   MESURE DE LA POSITION ET DE L'ECART
+//=====================================================================
+
+
+comptCod = getQEP1Pos();            // Lecture du compteur de pos.
+if (comptCod > ResolCod/2){ 		// Recentrage de la position mesurée
+	comptCod -= ResolCod;           //   entre -1000 et +1000 [imp],
+}                                   //   c'est-à-dire + ou - un 1/2 tour,
+									//   en partant de la plage par défaut
+									//   0 à 2000, qui présente donc une
+									//   discontinuité gênante en zéro.
+mesure_t[1] = mesure_t[0];          // Mémorisation de la pos. préc.
+mesure_t[0] = (float)comptCod/(float)ResolCod; // Pos. actuelle
+
+if(FirstTime==true)                 //Initailisation du tableau de valeur Value à 0
+{
+	FirstTime=false;
+	int i;
+	for(i=0;i<nbrEchantillon;i++)
+	{
+		Value[i]=0;
+	}
+}
+\end{lstlisting}
+
+\underline{Commentaires sur le code \ref{Implémentation régulateur PID}}:\\
+
+Les variables Kp,Ki et Kd sont déclarées en type float et initialisées d'après les valeurs du script Matlab, ceci afin de les tester. La première opération effectuée est de récupérer la valeur mesurée et la stocker dans la variable mesure\_t. Cette commande peut être faite grâce à cette portion de code (\ref{Mesure de la position et de l'écart}), qui lit le codeur incrémental. Yrp, Yri et Yrd sont les résultats des gains pour chaque opérateur. Une limite anti-wind-up sert de garde-fou pour l'intégrateur afin qu'il ne dépasse pas la consigne. La sortie du régulateur "ucm" est pilotée par l'addition de Yrp,Yri et Yrd. Enfin les variables sont misent à jour pour permettre d'intégrer et dériver au prochain appel de cette fonction.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/upRegPIDTest1}
+	\caption{Réponse du système pour la commande PID}
+	\label{fig:Réponse du système pour la commande PID}
+\end{figure}
+
+On remarque que le moteur se comporte bien selon les commandes données. Aucun dépassement de consigne n'est à déplorer. La régulation se fait en 80ms. Pour une telle application, le temps de réglage est nettement suffisant. Un Kp plus grand permettrait une réponse plus rapide mais il faudrait ajuster les autres par la même occasion. \\
+Grâce à cet essai, on remarque que la méthode d'Åström et Hägglund fonctionne bien. Il est question ensuite de s'attarder sur l'autoajustage. 
+
+\newpage
+
+\subsection{Régulateur PID autoajusté}
+Pour la suite de ce projet, il faut mixer les différentes parties de code citées précédemment (code \ref{Implémentation régulateur TOR} et \ref{Implémentation régulateur PID}) et écrire un algorithme qui calcule la période d'oscillation, l'amplitude du relais et l'amplitude de la mesure. Le diagramme de flux \ref{fig:Diagramme de flux UserTe} représente le déroulement de la fonction UserTe. Cette fonction est appelée toutes les $100\mu s$ par la fonction "main" grâce à un compteur. (ceux-ci ne sont pas décrits dans le présent rapport). Dans le fichier "user.c" se trouve aussi la fonction UserIdle qui gère l'affichage sur l'écran LCD et la gestion des boutons-poussoirs présents sur la carte. Le bouton bp1 sert à donner un saut de consigne. Le bp lance la phase de calcul des paramètres en initialisant des variables à zéro. Afin que le calcul s'effectue, il est nécessaire de mettre Kp, Ki et Kd à 0 pour ainsi satisfaire la condition ($Kp==0 \&\& Ki==0 \&\& Kd==0$).
+
+\begin{figure}[h]
+\centering
+% Définition des styles des blocs
+\tikzstyle{function} = [rectangle, draw, minimum width=5cm, text centered, minimum height=1cm]
+\tikzstyle{condition} = [diamond, draw, aspect=2, minimum width=3cm, text centered]
+\tikzstyle{start}=[ellipse,draw,minimum width=3cm,minimum height=1.5cm, text centered]
+\tikzstyle{line} = [draw, -latex']
+	\begin{tikzpicture}[node distance=1.5cm]
+	
+		% Création des nœuds
+		\node[start](start1){Start};
+		\node [function, below of=start1] (function1) {Initialisation des variables globales};
+		\node [function, below of=function1] (UserTE) {void UserTE(void)};
+		\node [function,below of=UserTE] (function2) {Mesure position et écart};
+		\node [condition, below=0.5cm of function2] (condition1) {Kp,Ki,Kd==0};
+		\node [function, below=0.5cm of condition1] (function3) {void CalcParam(void)};
+		\node [function, below right=0.75cm and 4cm of condition1] (function4) {void RegPID(void)};
+		\node [function, below of=function4] (function5) {Limitation};
+		\node [function, below of=function5] (function6) {Commande PWM};
+		\node [start,below of=function6](start2){Stop};
+	
+		
+		% Liaisons entre les nœuds
+		\path [line] (start1) -- (function1);
+		\path [line] (function1) -- (UserTE);
+		\path [line] (UserTE) -- (function2);
+		\path [line] (function2) -- (condition1);
+		\path [line] (condition1) -- node [near start, left] {oui} (function3);
+		\path [line] (condition1) -- node [near start,below] {non} +(7,0) -| (function4.north);
+		\path [line] (function3.south) -- ++(0,-0.5) -| ([xshift=-2cm] condition1.west) |- (condition1.north);
+		\path [line] (function4) -- (function5);
+		\path [line] (function5) -- (function6);
+		\path [line] (function6) -- (start2);
+		
+	\end{tikzpicture}	
+\caption{Organigramme de la fonction UserTe}
+\label{fig:Diagramme de flux UserTe}
+\end{figure}
+\newpage
+\begin{figure}[h]
+	\centering
+	% Définition des styles des blocs
+	\tikzstyle{function} = [rectangle, draw, minimum width=5cm, text centered, minimum height=1cm]
+	\tikzstyle{condition} = [diamond, draw, aspect=2, minimum width=3cm, text centered]
+	\tikzstyle{start}=[ellipse,draw,minimum width=3cm,minimum height=1.5cm, text centered]
+	\tikzstyle{line} = [draw, -latex']
+	\begin{tikzpicture}[node distance=1.5cm]
+		
+		% Création des nœuds
+		\node[start](start1){Start};
+		\node [function, below of=start1] (function1) {void RegRelais(void)};
+		\node [function, below of=function1] (function2) {Remplissage du tableau Value[]avec mesure\_t[0]};
+		\node [condition,below= 0.5cm of function2, align=center] (condition1) {Value[nbrEchantillon-1]!=0};
+		\node [function, below=0.5cm of condition1] (function3) {Parcourir Value[nbrechantillon]};
+		\node [condition, below=0.5cm of function3, align=center] (condition2) {Value[i] \\ >= value[$i\pm1$] \\ >= value[$i\pm2$]};
+		\node [condition, below=0.5cm  of condition2] (condition3) {Maximum1==-INFINITY};
+		\node [function, below=0.5cm of condition3] (function4) {PositionMax1=i};
+		\node [condition, below right=0.5cm and 2cm of function4] (condition4) {PositionMax1!=i};
+		\node [function, below=0.5cm of condition4] (function5) {PositionMax2=i};
+		\node [condition, below left=0.5cm and 2cm of function4, align=center] (condition5) {Maximum1 et Maximum2 \\ != -INFINITY};
+		\node[function,below=0.5cm of condition5](function6){Calcul de Tc,K0,Kc,k};
+		\node[function,below of=function6](function7){Calcul de Kp,Kd,Ki,b};
+		\node [start,below of=function7](start2){Stop};
+		
+		
+		% Liaisons entre les nœuds
+		\path [line] (start1) -- (function1);
+		\path [line] (function1) -- (function2);
+		\path [line] (function2) -- (condition1);
+		\path [line] (condition1) -- node [near start, left] {oui} (function3);	
+		\path [line] (condition1.west) -| node [near start,below] {non} (condition5.north);
+		\path [line] (function3) -- (condition2);
+		\path [line] (condition2) -- node [near start, left] {oui} (condition3);
+		\path [line] (condition2) -- node [near start,below] {non} +(5,0) |- (function3.east);
+		\path [line] (function4.south) -- ++(0,-0.5) -| ([xshift=-1cm] function3.west) |- (function3.west);	
+		\path [line] (condition3) -- node [near start, left] {oui} (function4);
+		\path [line] (condition3) -- node [near start,below] {non} +(5,0) -| (condition4.north);
+		\path [line] (condition4) -- node [near start, left] {oui} (function5);	
+		\path [line] (condition4) -- node [near start,below] {non} +(2,0) |- (function3.east);
+		\path [line] (condition5) -- (function6);
+		\path [line] (function6) -- (function7);
+		\path [line] (function7) -- (start2);
+		
+	\end{tikzpicture}
+	\caption{Organigramme de la fonction CalcParam}
+	\label{fig:Diagramme de flux CalcParam}	
+\end{figure}
+
+
+
+\newpage
+\begin{figure}[h]
+\begin{lstlisting}[language=C,caption={Fonction de calcul des paramètres selon AH}, label={Fonction de calcul des paramètres delon AH}]
+void CalcParam(void)
+{
+	//////////////////////Calculateur de paramètres///////////////////////////////////
+	
+	RegRelais();
+	int index;
+	for(index=0; index<=nbrEchantillon-1;index++)            // Remplissage du tableau Value avec les valeurs mesurées
+	{
+		if(Value[index]==0)
+		{
+			Value[index]=mesure_t[0];
+			break;
+		}
+	}
+	
+	if(Value[nbrEchantillon-1]!=0)                          //test si la dernière cellule du tableau est remplie (!=0)
+	{
+			int i;
+			for(i=100;i<nbrEchantillon-1;i++)              // Trouver les maximums locaux en passant les 100 premières cellules à cause des transitoires et ADC qui donnent des valeurs fausses
+			{
+				if(Value[i] >= Value[i-1]  && Value[i] >= Value[i-2]  && Value[i]>= Value[i+1] && Value[i] >= Value[i+2])
+				// trouver dans le tableau un maximum avec plusieurs condition à cause des transitoire et de l'ADC
+				{
+					if(Maximum1==-INFINITY)
+					{
+						Maximum1 =Value[i];
+						PositionMax1=i;
+					}
+					else if(PositionMax1 != i)
+					{
+						Maximum2 =Value[i];
+						PositionMax2=i;
+					}
+				}
+			}
+		
+	}
+	//// calcul des paramètres selon AH
+	
+	if(Maximum1 != -INFINITY && Maximum2 != -INFINITY)
+	{
+		float Tc = (PositionMax2 - PositionMax1) * Te; // Période d'oscillation
+		float K0 = consigneReg / Maximum2;
+		float Kc = (4 * Maximum2) / (M_PI * consigneReg);
+		float k = 1 / (K0 * Kc);
+			
+		if(Ms==2) // Ms=2
+		{
+			b = 0.25* expf(0.56 * k - 0.12 * k * k);
+			Kp = 0.72 * expf(-1.6 * k + 1.2 * k * k) * Kc;
+			Kp= b * Kp;
+			Ki = (0.59 * expf(-1.3 * k + 0.38 * k * k) * Tc);
+			Kd = 0.15 * expf(-1.4 * k + 0.56 * k * k) * Tc;
+		}
+		else //Ms =1.4
+		{
+			b = 0.58* expf(-1.3 * k + 3.5 * k * k);
+			Kp = 0.33 * expf(-0.31 * k - 1.0 * k * k) * Kc;
+			Kp= b * Kp;
+			Ki = (0.76 * expf(-1.6 * k - 0.36 * k * k) * Tc);
+			Kd = 0.17 * expf(-0.46 * k - 2.1 * k * k) * Tc;
+			
+		}
+		cons_t =0.2;
+	}
+	
+}
+	\end{lstlisting}
+\end{figure}
+\newpage
+\underline{Commentaires sur le code \ref{Fonction de calcul des paramètres selon AH}}:\\
+
+Premièrement, on exécute le régulateur à relais. On parcourt le tableau "Value[nbrEchantillon]" où nbrEchantillon =1000. On remplit à la suite chaque cellule avec la valeur de mesure\_t[0], et on sort de la boucle une fois faite (cela accélère le processus). On teste si le tableau est entièrement rempli (le signal correspond à environ 1,5 sinusoïde). On parcourt le tableau à la recherche d'une valeur supérieure aux deux valeurs d'avant et d'après (correspondant à l'amplitude de la mesure). Si l'on ne teste que la valeur avant et après, les erreurs de maxima sont fréquentes. On stocke aussi la valeur de i. Une fois le premier maximum ainsi que son indice trouvé, on poursuit avec le deuxième maximum. La valeur de celui-ci importe peu, son indice par contre est utile pour déterminer la période. Sachant qu'entre i et i+1 il se passe un appel de UserTe qui correspond à 100$\mu s$, on pourra calculer la période d'oscillation. \`A l'aide de la condition à la ligne 25 à 34 on test si les maximum1 et maximum2 ne sont plus égaux à -infini (initialement déclaré) \underline{et} que l'indice du maximum2 n'est pas le même que le maximum1. Ceci prouve qu'une valeur a été assignée à chacune d'elle. Enfin, avant de calculer les paramètres, on s'assure encore une fois qu'il ait bien trouvé des valeurs pour les deux amplitudes. En ligne 48-64, on différencie deux cas de MS (marge de sensibilité) qui est définie comme constante en début de programme.
+
+
+On remarque beaucoup de  conditions, en effet, il faut s'assurer que le programme ne commence pas à calculer des valeurs dont certaines variables ne sont pas encore définies, que'elles sont égales à 0 ou -infini.
+\newpage
+
+\subsection{Résulats du régulateur autoajusté}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/RepMS1,4TRegPID}
+	\caption{Réponse du système pour la commande autoajustée avec MS=1.4}
+	\label{fig:Réponse du système pour la commande autoajustée avec MS=1.4}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/RepMS2TRegPID}
+	\caption{Réponse du système pour la commande autoajustée avec MS=2}
+	\label{fig:Réponse du système pour la commande autoajustée avec MS=2}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/Auto TuningMoteurAccouplé+time}
+	\caption{Réponse du système pour la commande autoajustée, MS=1.4 avec changement de la dynamique}
+	\label{fig:Réponse du système pour la commande autoajustée, MS=1.4 avec changement de la dynamique}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{img/Ondulation_négative}
+	\caption{Réponse du système pour la commande autoajustée, avec deux ondulations négatives et une consigne encore active}
+	\label{fig:Réponse du système pour la commande autoajustée, avec deux ondulations négatives}
+\end{figure}
+
+Pour les réponses de la figure \ref{fig:Réponse du système pour la commande autoajustée avec MS=1.4} et \ref{fig:Réponse du système pour la commande autoajustée avec MS=2} le saut de consigne est de 0.4 dans le code (représente 2,4 sur l'oscilloscope) et pour la figure \ref{fig:Réponse du système pour la commande autoajustée, MS=1.4 avec changement de la dynamique}, le saut de consigne est de 0.2. Dans tous les cas, on observe la première phase qui consiste au régulateur à relais. Il effectue environ 1,5 sinus. Une fois les paramètres calculés, on voit le saut de consigne. Dès cet instant, le régulateur PID prend la main et régule le système. Dans les trois cas, la vitesse de régulation est bonne. Pour le meilleur des cas, c'est à dire moteur DC à vide avec MS=1,4, il régule en 60ms. La variante avec changement de dynamique, consiste à un accouplement du deuxième moteur DC présent sur la maquette. Celui-ci contraint le premier moteur en augmentant la charge à l'arbre et des forces de frottement supplémentaire.
+
+Un problème est néanmoins à déplorer dans le code. Le temps que dure la phase du régulateur à relais est trop long (environ 250ms). Avec une période d'appel de la fonction de 100$\mu s$, il faudrait un tableau de 2500 valeurs, en float. La mémoire du microprocesseur de la carte n'étant pas infinie, il est judicieux de doubler la période d'appel de UserTe. Cette manœuvre ne péjore pas la précision des mesures. Les oscillogrammes représentés sont issus de la nouvelle période.
+
+\`A ce stade, le code est fonctionnel. On ne prétend pas à un réglage parfait, mais tout de même satisfaisant. La variante de cette deuxième expérimentation avec la carte Delfino offre beaucoup de flexibilité. Ce langage de programmation ouvre la voie à de multiples possibles d'amélioration et d'optimisation. Ce niveau de souplesse dans le processus expérimental est essentiel pour répondre aux défis et aux exigences. 
+
+

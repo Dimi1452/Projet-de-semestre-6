@@ -1,0 +1,38 @@
+\babel@toc {french}{}\relax 
+\contentsline {part}{Abstract/Résumé}{I}{part*.1}%
+\contentsline {section}{Table des figures}{III}{part*.1}%
+\contentsline {section}{Liste des tableaux}{III}{part*.1}%
+\contentsline {section}{Liste des codes}{III}{part*.1}%
+\contentsline {section}{Abréviation}{IV}{part*.1}%
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Le projet}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Objectif}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Organisation du rapport}{1}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Cahier des charges}{1}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Planification du projet}{3}{subsection.1.5}%
+\contentsline {section}{\numberline {2}Ajustage des paramètres d'un régulateur PID :)}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Description d'un régulateur PID}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Méthode de réglage des régulateurss PID}{5}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Méthode itérative à trois phases}{5}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Méthode de Ziegler et Nichols}{5}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Méthode de Åström et Hägglund}{5}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Résumé}{7}{subsubsection.2.2.4}%
+\contentsline {section}{\numberline {3}Expérimentation 1}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Réalisation de la régulation}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Résultats}{10}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Expérimentation 2}{12}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Régulateur TOR}{13}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Régulateur PID}{14}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Régulateur PID autoajusté}{17}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Résulats du régulateur autoajusté}{19}{subsection.4.4}%
+\contentsline {section}{\numberline {5}synthèse}{24}{section.5}%
+\contentsline {section}{\numberline {6}Conclusion}{25}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Conclusion personnelle}{25}{subsection.6.1}%
+\contentsline {section}{Références}{26}{subsection.6.1}%
+\contentsline {section}{\numberline {A}Logiciels utilisés}{A-1}{appendix.A}%
+\contentsline {section}{\numberline {B}Matériels utilisés}{B-1}{appendix.B}%
+\contentsline {section}{\numberline {C}Annexe}{C-1}{appendix.C}%
+\contentsline {subsection}{\numberline {C.1}Code pour le placement des pôles}{C-1}{subsection.C.1}%
+\contentsline {subsection}{\numberline {C.2}Organigramme régulateur PID numérique}{C-2}{subsection.C.2}%
+\contentsline {subsection}{\numberline {C.3}Code Matlab paramètres méthode AH}{C-3}{subsection.C.3}%
+\contentsfinish 

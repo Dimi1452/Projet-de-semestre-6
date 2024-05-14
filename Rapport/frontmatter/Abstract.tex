@@ -1,0 +1,21 @@
+% !TeX root = ../Rapport.tex
+\part*{Abstract/Résumé}
+
+
+Ce rapport présente le projet "Auto-ajustage de régulateur PID" visant à explorer et appliquer les principales méthodes de réglage pour créer un système auto-régulé fonctionnel. L'étude se concentre sur l'utilisation du régulateur PID, largement répandu dans le domaine de la régulation automatique. L'objectif final est de développer un système capable de s'adapter aux variations de son environnement et de maintenir des performances optimales.
+
+La première maquette présente des inconvénients logiciels qui permettent de réaliser chacune des applications séparément, mais pas simultanément. En effet l'application auto-régulée est fastidieuse à réaliser avec des blocs fonctionnels (langage que prévoit Saia pour son automate). Il n'a pas été réalisé dans ce projet.
+
+Les résultats de la deuxième expérimentation montrent que le système auto-régulé répond de manière efficace aux sauts de consigne et parvient à réguler le système rapidement et avec précision. La régulation se fait en 60ms sans prendre en compte la phase d'oscillations (250ms). Des améliorations et optimisations peuvent être réalisées dans le code.
+
+Bien que la méthode Åström et Hägglund offre un bon point de départ pour le réglage des paramètres, elle ne constitue pas une solution universelle. Cependant, elle représente un point de départ dans la recherche des coefficients, offrant une méthode d'auto-ajustage autonome et adaptable à différents systèmes.
+
+\vspace{1cm}
+This report presents the "PID controller self-tuning" project, which aims to explore and apply the main tuning methods to create a functional self-tuning system. The study focuses on the use of the PID controller, which is widely used in the field of automatic control. The ultimate aim is to develop a system capable of adapting to variations in its environment and maintaining optimum performance.
+
+The first model has software drawbacks that allow each of the applications to be carried out separately, but not simultaneously. In fact, the self-regulating application is tedious to create using function blocks (the language that Saia provides for its PLC). It was not implemented in this project.
+
+The results of the second experiment show that the self-regulating system responds effectively to setpoint jumps and manages to regulate the system quickly and accurately. Regulation is achieved in 60ms without taking into account the oscillation phase (250ms). Improvements and optimisations can be made to the code.
+
+Although the Åström et Hägglund method provides a good starting point for parameter tuning, it is not a universal solution. However, it does provide a starting point in the search for coefficients, offering a self-tuning method that can be adapted to different systems.
+

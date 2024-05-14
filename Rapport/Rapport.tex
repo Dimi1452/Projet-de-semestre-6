@@ -1,0 +1,94 @@
+%% Document language
+% Support complet: french, british.
+% Support partiel: toutes les autres langues de babel.
+% Avec un support partiel, certaines légendes ou titres automatiques peuvent être faux.
+\PassOptionsToPackage{french}{babel}
+
+\documentclass{layout/heia-fr-ge-report}
+%\includeonly{} % Permet de n'inclure que certaines pages
+
+%% Espace pour inclure des package pour l'utilisateur
+\usepackage{lipsum}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,circuits.ee.IEC}
+\usepackage{circuitikz}
+\usepackage{todonotes}
+\usepackage {matlab-prettifier}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{rotating}
+
+%% Reference de la bibiographie
+\bibliography{bib.bib}
+
+%% Commende additionelle (pour l'utilisateur)
+\setlist{itemsep=-0pt} % Reduit legèrement les espaces dans les listes
+
+\begin{document}
+    % Paramètres de la page de titre -------------------------------------------    
+    \title{Projet de semestre 6}         % ou "Projet de semestre x"
+    \subtitle{Auto-ajustage de régulateur PID (ARP)}
+    %\subject{ligne supplementaire}     % Optionnel: commenter pour enlever
+    \author{Maillard Dimitri}
+    \Responsable{Moncef Justin Lalou}
+   % \Partenaire{Pas sur qu'il y en ait un}             % Optionnel
+    \filiere{Génie électrique, HEIA-FR}
+    \dateDebut{20.02.2024}
+    \dateFin{16.05.2024}
+    %\Version{V1.0}                 		% Optionnel
+    \TitlePic{img/RepMS1,4.png}            % lien vers l'image de titre 
+    \DisFromTitleToPic{0 cm}            % Distance du titre aà l'image
+    \TitlePicHight{12.5 cm}               % Hauteur de l'image de titre
+    %\copyrightNotice{Blabla est une marque déposé par bla corp.}    % Optionnel
+    % Paramètre de pages de textes ---------------------------------------------
+    \makeatletter                       % Commande pour pouvoir utiliser ces définitions dans le document
+    \TopLeft{PS6 - \@subtitle}       % texte en haut à gauche
+    \TopRight{\@author}                 % texte en haut à droite
+    \BottomLeft{}                       % texte en bas à gauche
+    \BottomRight{\thepage}              % texte en bas à droite
+    \makeatother                        % fin de \makeatletter
+    
+    %% =========================================================================
+    %% Titre ( pas de numerotation)
+    %% =========================================================================
+    \maketitle                          % Fait titre et page de copyright
+    
+    %% =========================================================================
+    %% Pages liminaires (numérotation des pages en notation romaines)
+    %% =========================================================================
+    \pagestyle{Intro}                   % Mise à jour du style
+    \include{frontmatter/Abstract}      % Optionnel
+    \tableofcontents                    % Table des matières
+    \newpage                            % Nouvelle page
+    \listoffigures                      % Liste des figures
+    \addcontentsline{toc}{section}{Table des figures} % Ajout dans la table des matières
+    \listoftables                       % Liste des tables§
+    \addcontentsline{toc}{section}{Liste des tableaux} % Ajout dans la table des matières
+    \lstlistoflistings                  % Liste des codes
+    \addcontentsline{toc}{section}{Liste des codes} % Ajout dans la table des matières
+    \newpage                            % Nouvelle page
+    \include{frontmatter/Nomenclature}  % Optionnel
+    %\include{frontmatter/Glossaire}     % Optionnel
+    
+    %% ===================================================================
+    %% Contenu principal (numérotation des pages en notation arabe)
+    %% ===================================================================
+    \pagestyle{Main}                    % Mise à jour du style
+    \include{main/intro}                % Intro
+    \include{main/Ajustage}					% Le contenu principal
+    \include{main/maquette1}       
+    \include{main/maquette2}
+    \include{main/synthese}          
+    \include{main/Conclusion}           % La conclusion
+    \newpage                            % Nouvelle page
+    \printbibliography[heading=bibintoc,title=Références] % Ajout de la bibiographie
+    \newpage                            % Nouvelle page
+    
+    %% ===================================================================
+    %% Annexe (Des lettre pour les chapitres et la numérotation)
+    %% ===================================================================    
+    \pagestyle{apdx}                    % Mise à jour du style
+    \include{annexe/Annexe}             % Ajout des annexes
+\end{document}

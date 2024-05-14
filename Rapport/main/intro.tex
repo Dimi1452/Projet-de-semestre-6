@@ -1,0 +1,144 @@
+% !TeX root = ../Rapport.tex
+\section{Introduction}
+
+Dans un monde où les systèmes automatisés jouent un rôle de plus en plus prépondérant, la nécessité de concevoir et de réguler efficacement ces systèmes prend une importance cruciale. C'est dans ce contexte que s'inscrit le projet intitulé "Auto-ajustage de régulateur PID". Ce rapport se concentre sur l'étude et la mise en œuvre du régulateur PID (Proportionnel, Intégral, Dérivé), une technique largement utilisée dans le domaine de la régulation automatique.
+
+L'objectif de ce projet est de créer un système auto-régulé fonctionnel, capable de s'adapter de manière autonome aux variations de son environnement tout en maintenant des performances optimales dans des conditions variables. Ainsi, ce rapport détaillera les différentes étapes de notre démarche, de l'étude théorique des méthodes de réglage à leur application pratique, en mettant en lumière les résultats obtenus au cours des expérimentations.
+
+\subsection{Le projet}
+Pour répondre à ce problème, il s'agit de développer un outil simple pour l'ajustement automatique des régulateurs PID. Les différents tests et essais sont effectués avec un API Saia PCD2 programmé à l'aide de logiciel PG5 et son langage FUPLA. En deuxième partie, ils seront faits sur un microprocesseur DSP TMS320F28335. L'environnement de développement est fait avec Code Composer Studio en "C".
+\subsection{Objectif}
+L'objectif de ce projet est, d'ici le 16 mai 2024, de réaliser un régulateur avec la méthode d'auto-ajustement de Åström et Hägglund en fonction de l'amortissement voulu.
+
+
+\subsection{Organisation du rapport}
+Le rapport est structuré en plusieurs sections distinctes.
+
+Il débute par une introduction qui met en lumière le contexte général du projet, l'objectif, la planification ainsi que le cahier des charges.
+
+Ensuite, la présentation de diverses méthodes de réglage sont décrites au point ajustage des paramètres d'un régulateur PID.
+
+La suite du rapport est consacrée à la description et à l'analyse de deux expérimentations. La description de chacune est faite au début. Divers schémas et figures illustrent le déroulement de la régulation.
+
+Dans la section 'Synthèse', les principaux résultats des expérimentations sont récapitulés et leur signification est discutée dans le contexte plus large de l'automatique et du contrôle des systèmes. Des enseignements sont tirés de ce travail et des perspectives pour des développements futurs sont envisagées.
+
+Enfin, le rapport se conclut en résumant les points clés abordés et en soulignant les défis rencontrés. 
+
+Le rapport se termine avec une liste de références bibliographiques utilisées dans le travail, ainsi que des annexes fournissant des informations supplémentaires pour une meilleure compréhension du rapport.
+\subsection{Cahier des charges}
+
+Les débuts de ce projet consistent à étudier les principales méthodes de réglage. La méthode de Åström et Hägglund sera, elle, mise en avant afin de réaliser un système auto régulé. Une fois la théorie bien comprise, à l'aide de modèles de laboratoire, des tests seront effectués afin de valider la méthode. Une première expérience sera réalisée à l'aide de l'automate Saia PCD2.M5540 et le logiciel PG5. Le "code" est écrit grâce à des blocs fonctionnels. Une deuxième maquette est à étudier. Elle comporte un moteur et est régulée par une carte Delfino dont le code est écrit en "C". Un rapport présentant les méthodes, les expérimentations, les descriptions, les tests ainsi que les résultats est écrit.
+
+
+
+\newpage
+\begin{landscape}
+\subsection{Planification du projet}
+Le projet débute la semaine du lundi 19 février 2024  (notée semaine 1) et se termine la semaine du lundi 20 mai 2024 (notée semaine 13). Le présent rapport est à rendre au plus tard le mercredi 15 mai 2024 à 23h59. Le rendu de la slide TV ainsi que le support Power-Point pour la défense orale est à rendre lundi 20 mai 2024. La défense orale de ce travail se fera le mardi 21 mai 2024. En bleu, le planning estimé, en jaune le planning effectif et en vert la rédaction du rapport. \textcolor{myBlue}{En bleu $\rightarrow$ Planifié} | \textcolor{myGreen}{en vert $\rightarrow$ Documentation} | \textcolor{myYellow}{En jaune $\rightarrow$ temps effectif} | \textcolor{myRed}{En rouge $\rightarrow$ Deadline}.\\
+
+\renewcommand{\arraystretch}{0.5}
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{|m{8cm}|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|}
+			\hhline{~*{13}{-}}
+			\multicolumn{1}{r|}{\shortstack{}} & \begin{sideways} 26.02-01.03\end{sideways} &\begin{sideways} 04.03-08.03\end{sideways} &\begin{sideways} 11.03-15.03 \end{sideways}&\begin{sideways} 18.03-22.03 \end{sideways}&\begin{sideways} 25.03-29.03 \end{sideways}&\begin{sideways} 01.04-05-04 \end{sideways}&\begin{sideways} 08.04-12.04 \end{sideways}&\begin{sideways} 15.04-19.04 \end{sideways}&\begin{sideways} 22.04-26.04 \end{sideways}&\begin{sideways} 29.04-03.05 \end{sideways}&\begin{sideways} 06.05-10.05 \end{sideways}&\begin{sideways} 13.05-17.05 
+			\end{sideways}&\begin{sideways} 20.05-24.05 \end{sideways}\\
+			\hhline{~*{13}{-}}
+			\multicolumn{1}{r|}{Semaines du projet} &1&2&3&4&5&6&7&8&9&10&11&12&13\\
+			\hhline{~*{13}{-}}
+			%\multicolumn{1}{r|} {Semaines de l’année civile} &9&10&11&12&13&14&15&16&17&18&19&20&21\\
+			\hline\noalign{\global\arrayrulewidth=2pt}\hline\noalign{\global\arrayrulewidth=1pt}
+			
+			&&&&&&&&&&&&\cellcolor{myRed} \footnotesize{15}&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Rendu Rapport}	
+			&&&&&&&&&&&&\cellcolor{myRed}&\\
+			\hline
+			
+			&&&&&&&&&&&&&\cellcolor{myRed} \footnotesize{20}\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Rendu Slide TV et Oral}	
+			&&&&&&&&&&&&&\cellcolor{myRed}\\
+			
+			\hline\noalign{\global\arrayrulewidth=2pt}\hline\noalign{\global\arrayrulewidth=1pt}
+			
+			&\cellcolor{myBlue}&&&&&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Planification et Objectif}	
+			&\cellcolor{myYellow}&&&&&&&&&&&&\\
+			\hline
+			
+				&&\cellcolor{myBlue}&&&&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Cahier des charges}	
+			&&\cellcolor{myYellow}&&&&&&&&&&&\\
+			\hline
+		
+			&\cellcolor{myBlue}&\cellcolor{myBlue}&\cellcolor{myBlue}&&&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{\'{E}tat de l'art}	
+			&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&&&&&&&&\\
+			\hline
+			
+			&&&&\cellcolor{myBlue}&&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{\textbf{Expérimentation 1 (SAIA)}}	
+			&&&\cellcolor{myYellow}&&&&&&&&&&\\
+			\hline
+			
+			
+			&&&\cellcolor{myBlue}&\cellcolor{myBlue}&\cellcolor{myBlue}&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Programmation PG5}	
+			&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&&&&&&&&\\
+			\hline
+			
+		
+			&&&&\cellcolor{myBlue}&\cellcolor{myBlue}&&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{\textbf{Expérimentation 2 (Delfino)}}	
+			&&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&&&&&&\\
+			\hline
+			
+			&&&&&&\cellcolor{myBlue}&&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Code régulateur à relais}	
+			&&&&&&\cellcolor{myYellow}&&&&&&&\\
+			\hline
+			
+			&&&&&&&\cellcolor{myBlue}&&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Code régulateur AH}	
+			&&&&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&&&&\\
+			\hline
+			
+			&&&&&&&&\cellcolor{myBlue}&&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Code Auto-tunning}	
+			&&&&&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&&&\\
+			\hline
+			
+			&&&\cellcolor{myBlue}&&&\cellcolor{myBlue}&\cellcolor{myBlue}&\cellcolor{myBlue}&\cellcolor{myBlue}&&&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Essai Laboratoire}	
+			&&&\cellcolor{myYellow}&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&\cellcolor{myYellow}&&&&\\
+			\hline
+			
+			
+			&&&&&&&&&&\cellcolor{myBlue}&\cellcolor{myBlue}&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Comparaison et synthèse}	
+			&&&&&&&&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&\\
+			
+			\hline\noalign{\global\arrayrulewidth=2pt}\hline\noalign{\global\arrayrulewidth=1pt}
+			
+			&&&\cellcolor{myGreen}&\cellcolor{myGreen}&&&\cellcolor{myGreen}&\cellcolor{myGreen}&\cellcolor{myGreen}&\cellcolor{myGreen}&\cellcolor{myGreen}&&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Rédaction Rapport}	
+			&&\cellcolor{myYellow}&\cellcolor{myYellow}&&&\cellcolor{myYellow}&\cellcolor{myYellow}&&\cellcolor{myYellow}&\cellcolor{myYellow}&\cellcolor{myYellow}&\cellcolor{myYellow}&\\ 
+			\hline
+			
+			&&&&&\cellcolor{myBlue}&&&&&&\cellcolor{myBlue}&\cellcolor{myBlue}&\\
+			\raisebox{.1\normalbaselineskip}[0pt][0pt]{Relecture\& correction}	
+			&&&&\cellcolor{myYellow}&&&&&&\cellcolor{myYellow}&&\cellcolor{myYellow}&\\
+			\hline
+			
+			
+			
+			
+			
+		\end{tabular}
+		
+	\end{center}
+	\caption{Planification du projet}
+	\vspace{-1em}
+\end{table}
+\end{landscape}
+
+
