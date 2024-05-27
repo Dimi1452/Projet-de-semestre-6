@@ -1,0 +1,87 @@
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper]{geometry}
+\usepackage{babel}
+\usepackage{lipsum}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,circuits.ee.IEC}
+\usepackage{circuitikz}
+\usepackage{todonotes}
+\usepackage {matlab-prettifier}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{rotating}
+\begin{document}
+\begin{figure}[h]
+	\centering
+	% Définition des styles des blocs
+	\tikzstyle{function} = [rectangle, draw, minimum width=5cm, text centered, minimum height=1cm]
+	\tikzstyle{condition} = [diamond, draw, aspect=2, minimum width=3cm, text centered]
+	\tikzstyle{start}=[ellipse,draw,minimum width=3cm,minimum height=1.5cm, text centered]
+	\tikzstyle{line} = [draw, -latex']
+	\begin{tikzpicture}[node distance=1.5cm]
+		
+		% Création des nœuds
+		\node[start](start1){Start};
+	
+		\node [function, below of=start1] (UserTE) {void UserTE(void)};
+		\node [function,below of=UserTE] (function2) {Mesure position et écart};
+		\node [condition, below=0.5cm of function2] (condition1) {Kp,Ki,Kd==0};
+		\node [function, below=0.5cm of condition1] (function3) {void CalcParam(void)};
+		\node [function, below right=0.75cm and 4cm of condition1] (function4) {void RegPID(void)};
+		\node [function, below of=function4] (function5) {Limitation};
+		\node [function, below of=function5] (function6) {Commande PWM};
+		\node [start,below of=function6](start2){Stop};
+		
+		
+		% Liaisons entre les nœuds
+		\path [line] (start1) -- (UserTE);
+		\path [line] (UserTE) -- (function2);
+		\path [line] (function2) -- (condition1);
+		\path [line] (condition1) -- node [near start, left] {oui} (function3);
+		\path [line] (condition1) -- node [near start,below] {non} +(7,0) -| (function4.north);
+		\path [line] (function3.south) -- ++(0,-0.5) -| ([xshift=-2cm] condition1.west) |- (condition1.north);
+		\path [line] (function4) -- (function5);
+		\path [line] (function5) -- (function6);
+		\path [line] (function6) -- (start2);
+		
+	\end{tikzpicture}	
+
+\end{figure}
+\newpage
+\begin{figure}[h]
+	\centering
+	% Définition des styles des blocs
+	\tikzstyle{function} = [rectangle, draw, minimum width=5cm, text centered, minimum height=1cm]
+	\tikzstyle{condition} = [diamond, draw, aspect=2, minimum width=3cm, text centered]
+	\tikzstyle{start}=[ellipse,draw,minimum width=3cm,minimum height=1.5cm, text centered]
+	\tikzstyle{line} = [draw, -latex']
+	\begin{tikzpicture}[node distance=1.5cm]
+		
+		% Création des nœuds
+		\node[start](start1){Interruption};
+		\node [condition, below=1cm of start1] (condition1) {Bp1 pressed?};
+		\node [condition, right=4cm of condition1] (condition2) {Bp2 pressed?};
+		\node [function,below=0.5 of condition1] (function1) {Saut de consigne};
+		\node [function,below=0.5 of condition2] (function2) {Kp,Ki,Kd=0};
+		
+	
+		
+		
+		% Liaisons entre les nœuds
+		\path [line] (start1) -- (condition1);
+		\path [line] (start1.south) -| (condition2);
+		\path [line] (condition1.east) -| node [near start, below] {non} (4,-1.75) -- (condition1.north);
+		\path [line] (condition1) -- node [near start,left] {oui} (function1);
+		\path [line] (condition2.east) -| node [near start, below] {non} (12,-1.75) -- (condition2.north);
+		\path [line] (condition2) -- node [near start,left] {oui} (function2);
+
+		
+	\end{tikzpicture}	
+
+\end{figure}
+\end{document}

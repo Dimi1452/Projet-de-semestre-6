@@ -142,6 +142,26 @@
       \verb https://www.sciencedirect.com/science/article/abs/pii/096706619391394C
       \endverb
     \endentry
+    \entry{Lalou}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=3876b53ef282bcff18d2f8373854d224}{%
+           family={Lalou},
+           familyi={L\bibinitperiod},
+           given={Justin\bibnamedelima Moncef},
+           giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \strng{namehash}{3876b53ef282bcff18d2f8373854d224}
+      \strng{fullhash}{3876b53ef282bcff18d2f8373854d224}
+      \strng{bibnamehash}{3876b53ef282bcff18d2f8373854d224}
+      \strng{authorbibnamehash}{3876b53ef282bcff18d2f8373854d224}
+      \strng{authornamehash}{3876b53ef282bcff18d2f8373854d224}
+      \strng{authorfullhash}{3876b53ef282bcff18d2f8373854d224}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Cours Chap 3 Dimenssionnement des régulateurs classiques, méthode experimentales}
+    \endentry
   \enddatalist
 \endrefsection
 \endinput
